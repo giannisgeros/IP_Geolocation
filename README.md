@@ -1,7 +1,6 @@
 # The Project
 Ip_Geolocation is a simple ASP.NET MVC 5 web application that searches the ip that you have given and returns some results.
 
-
 ## Components
 - models (and validations with data annotations)
 - web api calls
@@ -9,7 +8,7 @@ Ip_Geolocation is a simple ASP.NET MVC 5 web application that searches the ip th
 - failovers
 - services
 - cache memory representation
-- javascript / jquery
+- JavaScript / jQuery
 
 ## The Idea
 The idea is to make a basic and simple example that includes some of the stuff that real world applications use. 
@@ -19,7 +18,7 @@ When an ip is entered at the input of the form, the app calls an API (ip2c) and 
 It tries to call a second API(ipStack) for the same results. There is not third API if the second fails but you get the idea :D.
 When an ip is entered and the api returns results, the app writes these data to the cache for 3 seconds(just to see that they are there).
 If someone tries to input the same ip again, the app doesn't call the api instead it takes the results from the cache.
-This all works with JavaScript enabled (for better UX), but even with JanaScript turned off it still works.
+This all works with JavaScript enabled (for better UX), but even with JavaScript turned off it still works.
 
 ## Installation
 The second API (ipStack) requires an API key. 

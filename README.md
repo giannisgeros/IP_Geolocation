@@ -23,6 +23,7 @@ This all works with JavaScript enabled (for better UX), but even with JavaScript
 ## Installation
 The second API (ipStack) requires an API key. 
 Go make an account(it's free) and put your API key at the webconfig file, under configuration -> appsettings -> ipStackApiKey.
+You may also have to restore some nuget packages.
 Other than that, just plug and play.
 
 ## License

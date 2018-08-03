@@ -1,0 +1,198 @@
+﻿@model IP_Geolocation.Models.IpViewModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@section styles {
+    <link href="~/Content/HomeIndex.css" rel="stylesheet" />
+}
+
+
+<div class="row">
+    <div class="col-md-12 centerizer">
+        <h2>Please enter you ip and we will find your Country!</h2>
+        <hr />
+    </div>
+    <div class="col-md-4">
+        
+    </div>
+    <div class="col-md-4 my-form centerizer">
+        <!-- Form -->
+        @using (Html.BeginForm("Get", "Home", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label class="form-label" style="position:absolute;" for="IP">Enter IP Here</label>
+                @Html.EditorFor(model => model.IP, new { htmlAttributes = new { @class = "form-contorl"} })
+                <br/>
+                @Html.ValidationMessageFor(model => model.IP, "", new { @class = "text-danger" })
+                <span style="color: #dc3545;">@ViewData["ErrorMessage"]</span>
+                <span id="js-validation-message"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" role="button" class="btn btn-info">Search</button>
+                
+                <!-- Loading gif -->
+                <div id="loading-gif">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-ripple">
+                        <circle cx="50" cy="50" r="30.1887" fill="none" ng-attr-stroke="{{config.c1}}" ng-attr-stroke-width="{{config.width}}" stroke="#f3dcb2" stroke-width="2">
+                            <animate attributeName="r" calcMode="spline" values="0;40" keyTimes="0;1" dur="1" keySplines="0 0.2 0.8 1" begin="-0.5s" repeatCount="indefinite"></animate>
+                            <animate attributeName="opacity" calcMode="spline" values="1;0" keyTimes="0;1" dur="1" keySplines="0.2 0 0.8 1" begin="-0.5s" repeatCount="indefinite"></animate>
+                        </circle>
+                        <circle cx="50" cy="50" r="9.16586" fill="none" ng-attr-stroke="{{config.c2}}" ng-attr-stroke-width="{{config.width}}" stroke="#cacbc5" stroke-width="2">
+                            <animate attributeName="r" calcMode="spline" values="0;40" keyTimes="0;1" dur="1" keySplines="0 0.2 0.8 1" begin="0s" repeatCount="indefinite"></animate>
+                            <animate attributeName="opacity" calcMode="spline" values="1;0" keyTimes="0;1" dur="1" keySplines="0.2 0 0.8 1" begin="0s" repeatCount="indefinite"></animate>
+                        </circle>
+                    </svg>
+                </div>
+            </div>
+        }
+
+        <!-- Results -->
+        @if (Model != null)
+        {
+            var flagUrl = ("https://www.countryflags.io/" + Model.TwoLettersCode + "/flat/64.png");
+            <ul>
+                <li>Country: <strong>@Model.Country</strong></li>
+                <li>Two Letter ISO: <strong>@Model.TwoLettersCode</strong></li>
+                <li>Provider or Cache Used: <strong>@Model.ProviderOrCacheUsed</strong></li>
+                <li><img src="@flagUrl" /></li>
+            </ul>
+        }
+
+
+        <!-- Spa Results-->
+        <ul id="spa-results-list">
+
+        </ul>
+    </div>
+    <div class="col-md-4">
+        
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(() => {
+
+            // ---- move placeholder on focus ----
+            $('form :input#IP').focus(() => {
+                $('.form-label').css('font-size', '12px');
+                $('.form-label').css('top', '0');
+            });
+
+            $('form :input#IP').blur(() => {
+                if ($('form :input#IP').val() == '') {
+                    $('.form-label').css('font-size', '16px');
+                    $('.form-label').css('top', '16px');
+                }
+            });
+
+            // ---- validation for ip address ----
+            function validateIp(ip) {
+                let ipRegExp = /\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b/;
+                if (ipRegExp.test(ip)) {
+                    return true;
+                }
+                return false;
+            }
+
+            // ---- display errorMessage ----
+            function ipErrorMessage(errorMessageInput) {
+                $('#spa-results-list').hide();
+                $('#js-validation-message').html('');
+                $('form :input#IP').css('border-bottom', '1px solid red');
+                let errorMessage = '<p>' + errorMessageInput + '</p>';
+                $('#js-validation-message').append(errorMessage);
+                $('form :input#IP').focus();
+            }
+
+            // ---- submit form without reload page ----
+            function showDataSPA(model) {
+
+                // make the necessary display settings
+                $('#js-validation-message').html('');
+                $('#spa-results-list').hide();
+                $('#spa-results-list').html('');
+                $('form button').show();
+                $('#loading-gif').hide();
+
+                // set the variables
+                let countryName = model.Country;
+                let twoLettersCode = model.TwoLettersCode;
+                let providerOrCacheUsed = model.ProviderOrCacheUsed;
+                let flag = 'https://www.countryflags.io/' + twoLettersCode + '/flat/64.png';
+                
+                // create html content
+                let countryNameHtml = '<li>Country: <strong>' + countryName + '</strong></li>';
+                let twoLettersCodeHtml = '<li>Two Letter ISO: <strong>' + twoLettersCode + '</strong></li>';
+                let providerOrCacheUsedHtml = '<li>Provider or Cache Used: <strong>' + providerOrCacheUsed + '</strong></li>';
+                let flagHtml = '<li><img src="' + flag + '"/></li>';
+                
+                // append html
+                $('#spa-results-list').append(countryNameHtml);
+                $('#spa-results-list').append(twoLettersCodeHtml);
+                $('#spa-results-list').append(providerOrCacheUsedHtml);
+                $('#spa-results-list').append(flagHtml);              
+
+                $('#spa-results-list').slideDown();
+                $('form :input#IP').focus();
+            }
+
+            // ---- form client-side validation ----
+            $('form').submit((e) => {
+                e.preventDefault();
+
+                let ip = $('form :input#IP').val();
+                if (ip == null || ip == '') {
+                    ipErrorMessage('The IP field cannot be empty');
+                }
+                else if (!validateIp(ip)) {
+                    ipErrorMessage('Please type a valid IP address');
+                }
+                else {
+
+                    // make the necessary display settings
+                    $('form :input#IP').css('border-bottom', '1px solid teal');
+                    $('form button').hide();
+                    $('#loading-gif').show();
+
+                    // submit form
+                    $.ajax({
+                        url: '@Url.Action("GetJson", "Home")',
+                        method: 'post',
+                        data: $('form').serialize(),
+                        success: (response) => {
+                            if (response == 'This Ip is valid but does not correspond to any country') {
+                                ipErrorMessage('This IP does not correspond to any country yet');
+                                $('form button').show();
+                                $('#loading-gif').hide();
+                            }
+                            else if (response == 'Services Failed') {
+                                ipErrorMessage('Sorry, it seems that the services have failed');
+                                $('form button').show();
+                                $('#loading-gif').hide();
+                            }
+                            else if (response == 'Invalid Ip') {
+                                ipErrorMessage('This IP is invalid');
+                                $('form button').show();
+                                $('#loading-gif').hide();
+                            }
+                            else {
+                                console.log(response);
+                                showDataSPA(response);
+                            }
+                        }
+                    });
+                };
+            });
+        });
+    </script>
+}
+
+
+
+
